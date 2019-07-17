@@ -3,6 +3,7 @@
 #define PS2Mouse_h
 #define REMOTE 1
 #define STREAM 2
+#define RETURN_TIMEMOUT -108
 
 class PS2Mouse
 {
@@ -13,6 +14,7 @@ class PS2Mouse
     int _initialized;
     int _enabled;
     int _disabled;
+  	int8_t read_byte_timeout(int16_t timeout);
     int8_t read_byte();
     int read_bit();
     int16_t read_movement_x(int);
@@ -27,6 +29,7 @@ class PS2Mouse
     int data_pin();
     int read();
     int16_t* report(int16_t data[]);
+  	int16_t* read_ps2_data(int16_t data[], int16_t timeout);
     void write(int);
     void enable_data_reporting();
     void disable_data_reporting();
