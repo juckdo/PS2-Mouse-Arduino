@@ -171,6 +171,49 @@ int16_t * PS2Mouse::report(int16_t data[]) {
   return data;
 }
 
+int16_t * PS2Mouse::read_ps2_data(int16_t data[], int16_t timeout) {
+ int8_t d = RETURN_TIMEMOUT;
+ 
+ while(1)
+ {
+  d = read_byte_timeout(timeout);
+  if(d == RETURN_TIMEMOUT)
+  {
+   data[1] = 0;
+   data[2] = 0;
+   return data;
+  }
+  if(d&0x08 && !(d&0x80))
+  {
+   break;
+  }
+ }
+
+ data[0] = d;
+ data[1] = read_byte();
+ data[2] = read_byte();
+
+  return data;
+}
+
+int8_t PS2Mouse::read_byte_timeout(int16_t timeout) {
+  int8_t data = 0;
+  pull_high(_clock_pin);
+  pull_high(_data_pin);
+  delayMicroseconds(50);
+  int16_t c=0;
+  while (digitalRead(_clock_pin)) { if(c>timeout) { pull_high(_clock_pin); return RETURN_TIMEMOUT;} c++;}
+  delayMicroseconds(5);  // not sure why.
+  while (!digitalRead(_clock_pin)) {}
+  for (int i = 0; i < 8; i++) {
+    bitWrite(data, i, read_bit());
+  }
+  read_bit(); // Partiy Bit
+  read_bit(); // Stop bit should be 1
+  pull_low(_clock_pin);
+  return data;
+}
+
 int PS2Mouse::read() {
   return read_byte();
 }
